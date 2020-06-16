@@ -1,0 +1,68 @@
+
+Scanner:
+
+LBRACE := {
+RBRACE := }
+PRINT := print
+SEMI := ;
+NAME := (a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z){(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|0|1|2|3|4|5|6|7|8|9|0)}
+[informal version of above] NAME := letter {letter | digit}
+
+NUMBER := ((1|2|3|4|5|6|7|8|9|0){(1|2|3|4|5|6|7|8|9|0)}.(1|2|3|4|5|6|7|8|9|0){(1|2|3|4|5|6|7|8|9|0)}) |  (1|2|3|4|5|6|7|8|9|0){(1|2|3|4|5|6|7|8|9|0)}
+[informal version of above] NUMBER := (digit{digit} . digit{digit}) | (digit{digit})
+
+PLUS :=   +
+EQUALASSIGN :=   =
+LPAREN :=   (
+RPAREN :=   )
+
+
+Parser:
+
+<S> := <program>
+<program> := <function> | <function> <program> //notice this is right recursive and not left recursive. 
+<function> := <nameid> LBRACE <statements> RBRACE
+<statements> := <statement> { <statement> }      
+<statement> := <declaration> | <assignment> | <print> | <functioncall>      //in the implementation <statement> is telescoped so it has no node in the AST (see other note below). This means that because the statement only has 1 thing in it and the statement does not affect how its children are printed out or run in any way, we telescope (read: remove) the statement node from the AST. in this case, we simply don't ever create it.
+<declaration> := <nameid> <nameid> SEMI 
+<assignment> := <nameid> EQUALASSIGN <expression>  SEMI 
+<print> := PRINT <expression>  SEMI 
+<functioncall> := <nameid>  LPAREN RPAREN <SEMI> 
+expression := <term> PLUS <expression> | <term> 
+term := <nameid> | NUMBER           //the implementation of this compiler telescopes term -> nameid rule so that all that is returned by the <term> function is a <nameid> node and not a <term>, which contains a <nameid>. Either way, parent -> term ->nameid or parent -> nameid is acceptable. 
+nameid := NAME 
+
+
+typechecker:
+
+Each function has own scoping
+errors where you think there would be errors (repeatedly defined functions or variables or mixing variables and functions [ as functions cannot return anything in this project]).
+int = standard c++ int
+number = standard c++ double
+a NUMBER is an int or number based on whether it has a decimal number
+ints and numbers cannot mix
+
+
+
+output format:
+
+function X
+add x y z
+set x const
+setreg x reg
+print x
+functioncall x
+clear x
+
+
+
+
+
+
+
+
+
+
+
+
+
